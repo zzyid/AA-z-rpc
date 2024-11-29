@@ -1,16 +1,19 @@
 package com.zzy.yurpc.proxy;
 
 import ch.qos.logback.core.util.InvocationGate;
+import com.github.javafaker.Faker;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Date;
 
 /**
  * Mock服务代理（JDK动态代理）
  */
 @Slf4j
 public class MockServiceProxy implements InvocationHandler {
+    private final Faker faker = new Faker();
 
     /**
      * 调用代理
@@ -31,29 +34,51 @@ public class MockServiceProxy implements InvocationHandler {
 
     /**
      * 根据获取的返回值类型生成默认值对象
-     * @param Type
-     * @return
      */
-    private Object getDefaultObject(Class<?> Type){
+    private Object getDefaultObject(Class<?> type){
         //基本类型
         // Type.isPrimitive()：判断是否是基本类型
-        if(Type.isPrimitive()){
-            if(Type == int.class){
+        if(type.isPrimitive()){
+            if(type == int.class){
                 return 0;
-            } else if(Type == long.class){
+            } else if(type == long.class){
                 return 0L;
-            } else if(Type == float.class){
+            } else if(type == float.class){
                 return 0.0f;
-            } else if (Type == double.class) {
+            } else if (type == double.class) {
                 return 0.0d;
-            } else if (Type == boolean.class) {
+            } else if (type == boolean.class) {
                 return false;
-            } else if (Type == char.class) {
+            } else if (type == char.class) {
                 return '\u0000';
-            } else if (Type == short.class) {
+            } else if (type == short.class) {
                 return (short) 0;
 
             }
+        }else {
+            if(type == String.class){
+                return faker.name().fullName();
+            }else if (type == Date.class) {
+                return faker.date().past(365, java.util.concurrent.TimeUnit.DAYS);
+            } else if (type == Integer.class) {
+                return 0;
+            } else if (type == Long.class) {
+                return 0L;
+            } else if (type == Float.class) {
+                return 0.0f;
+            } else if (type == Double.class) {
+                return 0.0d;
+            } else if (type == Boolean.class) {
+                return false;
+            } else if (type == Character.class) {
+                return '\u0000';
+            } else if (type == Short.class) {
+                return (short) 0;
+            } else {
+                // 其他引用类型返回 null
+                return null;
+            }
+
         }
         //如果返回的是引用类型，则返回null
         return null;

@@ -3,6 +3,7 @@ package com.zzy.example.provider;
 
 import com.zzy.example.common.service.UserService;
 import com.zzy.yurpc.RpcApplication;
+import com.zzy.yurpc.config.RpcConfig;
 import com.zzy.yurpc.registry.LocalRegistry;
 import com.zzy.yurpc.server.HttpServer;
 import com.zzy.yurpc.server.VertxHttpServer;

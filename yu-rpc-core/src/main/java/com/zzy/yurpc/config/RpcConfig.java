@@ -27,13 +27,5 @@ public class RpcConfig {
      */
     private int serverPort = 8081;
 
-    @Override
-    public String toString() {
-        return "RpcConfig{" +
-                "name='" + name + '\'' +
-                ", version='" + version + '\'' +
-                ", serverHost='" + serverHost + '\'' +
-                ", serverPort=" + serverPort +
-                '}';
-    }
+    private boolean mock = false;
 }

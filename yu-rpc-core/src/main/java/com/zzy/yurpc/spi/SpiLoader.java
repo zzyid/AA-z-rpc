@@ -75,11 +75,17 @@ public class SpiLoader {
      * @return
      */
     public static <T> T getInstance(Class<?> tClass, String key) {
-        load(tClass);
         String tClassName = tClass.getName();
         Map<String, Class<?>> keyClassMap = loaderMap.get(tClassName);
+        // 如果还没有加载过该类型，则加载
+        // 双重锁
         if (keyClassMap == null) {
-            throw new RuntimeException(String.format("SpiLoader 未加载 %s 类型", tClassName));
+            synchronized (loaderMap) {
+                keyClassMap = loaderMap.get(tClassName);
+                if (keyClassMap == null) {
+                    keyClassMap = load(tClass);
+                }
+            }
         }
         if (!keyClassMap.containsKey(key)) {
             throw new RuntimeException(String.format("SpiLoader 的 %s 不存在 key=%s 的类型", tClassName, key));

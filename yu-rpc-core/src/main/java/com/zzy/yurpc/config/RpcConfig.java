@@ -1,5 +1,6 @@
 package com.zzy.yurpc.config;
 
+import com.zzy.yurpc.serializer.SerializerKeys;
 import lombok.Data;
 
 /**
@@ -27,5 +28,13 @@ public class RpcConfig {
      */
     private int serverPort = 8081;
 
+    /**
+     * 是否使用模拟数据
+     */
     private boolean mock = false;
+
+    /**
+     * 序列化方式
+     */
+    private String serializer = SerializerKeys.JDK;
 }

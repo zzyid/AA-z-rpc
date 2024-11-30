@@ -36,5 +36,5 @@ public class RpcConfig {
     /**
      * 序列化方式
      */
-    private String serializer = SerializerKeys.JDK;
+    private String serializer = SerializerKeys.JSON;
 }

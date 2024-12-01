@@ -94,6 +94,7 @@ public class SpiLoader {
         Class<?> implClass = keyClassMap.get(key);
         // 从实例缓存中加载指定类型的实例
         String implClassName = implClass.getName();
+        // 如果还没有加载过该实例，则加载
         if (!instanceCache.containsKey(implClassName)) {
             try {
                 instanceCache.put(implClassName, implClass.newInstance());
@@ -102,6 +103,7 @@ public class SpiLoader {
                 throw new RuntimeException(errorMsg, e);
             }
         }
+        // 如果加载过该实例，则直接返回
         return (T) instanceCache.get(implClassName);
     }
 

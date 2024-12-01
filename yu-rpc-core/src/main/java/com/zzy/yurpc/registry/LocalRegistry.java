@@ -14,6 +14,7 @@ public class LocalRegistry {
 
     /**
      * 注册信息存储
+     * static：所有实例都能用同一个静态变量
      */
     private static final Map<String, Class<?>> map = new ConcurrentHashMap<>();
 

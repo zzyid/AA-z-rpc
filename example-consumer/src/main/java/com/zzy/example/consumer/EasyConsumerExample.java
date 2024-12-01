@@ -15,7 +15,7 @@ public class EasyConsumerExample {
         // todo 需要获取 UserService 的实现类对象
         // 动态代理
         // 获取代理,每次使用userService都会调用ServiceProxy的invoke方法
-        UserService userService = ServiceProxyFactory.getProxy(UserService.class,"yml");
+        UserService userService = ServiceProxyFactory.getProxy(UserService.class);
         User user = new User();
         user.setName("123");
         // 调用

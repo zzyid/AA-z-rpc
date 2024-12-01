@@ -37,4 +37,8 @@ public class RpcConfig {
      * 序列化方式
      */
     private String serializer = SerializerKeys.JSON;
+    /**
+     * 注册中心配置
+     */
+    private RegistryConfig registryConfig = new RegistryConfig();
 }

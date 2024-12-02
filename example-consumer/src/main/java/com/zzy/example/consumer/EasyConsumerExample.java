@@ -22,7 +22,6 @@ public class EasyConsumerExample {
         // 调用getUser方法之前，会调用ServiceProxy的invoke方法
         User newUser = userService.getUser(user);
         if (newUser != null) {
-
             System.out.println(newUser.getName());
         } else {
             System.out.println("user == null");

@@ -28,9 +28,8 @@ public class RegistryConfig {
 
     /**
      * 超时时间（单位毫秒）
+     * 是指连接到etcd的时间
      */
     private Long timeout = 10000L;
-
-
 
 }

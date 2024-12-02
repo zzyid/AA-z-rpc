@@ -1,21 +1,16 @@
 package com.zzy.example.provider;
 
 
-
 import com.zzy.example.common.service.UserService;
 import com.zzy.yurpc.RpcApplication;
 import com.zzy.yurpc.config.RegistryConfig;
 import com.zzy.yurpc.config.RpcConfig;
-import com.zzy.yurpc.constanl.RpcConstant;
 import com.zzy.yurpc.model.ServiceMetaInfo;
 import com.zzy.yurpc.registry.LocalRegistry;
 import com.zzy.yurpc.registry.Registry;
 import com.zzy.yurpc.registry.RegistryFactory;
 import com.zzy.yurpc.server.HttpServer;
 import com.zzy.yurpc.server.VertxHttpServer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 服务提供者示例

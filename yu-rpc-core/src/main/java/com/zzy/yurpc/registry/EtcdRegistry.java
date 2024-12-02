@@ -124,6 +124,15 @@ public class EtcdRegistry implements Registry{
     @Override
     public void destroy() {
         System.out.println("当前节点下线");
+        // 下线节点
+        // 遍历本节点所有的key
+        for (String key : localRegisterNodeKeySet){
+            try{
+                kvClient.delete(ByteSequence.from(key, StandardCharsets.UTF_8)).get();
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(key + "节点下线失败");
+            }
+        }
         //释放资源
         if(kvClient != null){
             kvClient.close();
@@ -171,7 +180,6 @@ public class EtcdRegistry implements Registry{
         // 支持秒级别定时任务
         CronUtil.setMatchSecond(true);
         CronUtil.start(); // 启动
-
     }
 }
 

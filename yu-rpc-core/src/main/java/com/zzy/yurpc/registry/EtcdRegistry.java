@@ -1,6 +1,7 @@
 package com.zzy.yurpc.registry;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.json.JSONUtil;
@@ -10,6 +11,7 @@ import io.etcd.jetcd.*;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
+import io.etcd.jetcd.watch.WatchEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
@@ -34,11 +36,26 @@ public class EtcdRegistry implements Registry{
      */
     private final Set<String> localRegisterNodeKeySet = new HashSet<>();
 
+    /**
+     * 注册中心服务缓存
+     * （只支持单个服务缓存，已废弃，请使用下方的 RegistryServiceMultiCache）
+     */
+    @Deprecated
+    private final RegistryServiceCache registryServiceCache = new RegistryServiceCache();
 
+    /**
+     * 注册中心服务缓存（支持多个服务键）
+     */
+    private final RegistryServiceMultiCache registryServiceMultiCache = new RegistryServiceMultiCache();
     /**
      * 根节点
      */
     private static final String ETCD_ROOT_PATH = "/rpc/";
+
+    /**
+     * 正在监听的key集合
+     */
+    private final Set<String> watchingKeySet = new ConcurrentHashSet<>();
     /**
      * 初始化注册中心
      * @param registryConfig 注册中心配置
@@ -96,7 +113,14 @@ public class EtcdRegistry implements Registry{
      */
     @Override
     public List<ServiceMetaInfo> serviceDiscover(String serviceKey) {
+//        // 优先从缓存获取服务
+//        List<ServiceMetaInfo> cacheServiceMetaInfoList = registryServiceCache.readCache();
 
+        // 优化后的代码，支持多个服务同时缓存
+        List<ServiceMetaInfo> cachedServiceMetaInfoList = registryServiceMultiCache.readCache(serviceKey);
+        if(cachedServiceMetaInfoList != null){
+            return cachedServiceMetaInfoList;
+        }
         String searchPrefix = ETCD_ROOT_PATH + serviceKey;
 
         try{
@@ -107,12 +131,19 @@ public class EtcdRegistry implements Registry{
                     getOption
             ).get().getKvs();
             // 解析服务信息
-            return keyValues.stream()
+            List<ServiceMetaInfo> serviceMetaInfoList = keyValues.stream()
                     .map(keyValue -> {
+                        String key = keyValue.getKey().toString(StandardCharsets.UTF_8);
+                        // 监听key的变化
+                        watch(key);
                         String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
                         return JSONUtil.toBean(value, ServiceMetaInfo.class);
                     })
                     .collect(Collectors.toList());
+            // 写入缓存
+//            registryServiceCache.writeCache(serviceMetaInfoList);
+            registryServiceMultiCache.writeCache(serviceKey, serviceMetaInfoList);
+            return serviceMetaInfoList;
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException("获取服务列表失败",e);
         }
@@ -180,6 +211,39 @@ public class EtcdRegistry implements Registry{
         // 支持秒级别定时任务
         CronUtil.setMatchSecond(true);
         CronUtil.start(); // 启动
+    }
+
+    /**
+     * 监听服务(客户端)
+     * @param serviceKey
+     */
+    @Override
+    public void watch(String serviceKey) {
+        // 获取监听客户端
+        Watch watchClient = client.getWatchClient();
+        // 之前未被监听，开启监听
+        boolean newWatch = watchingKeySet.add(serviceKey);
+        if(newWatch){
+            watchClient.watch(ByteSequence.from(serviceKey, StandardCharsets.UTF_8), response -> {
+                for(WatchEvent event : response.getEvents()) {
+                    switch (event.getEventType()){
+                        // key 删除时触发
+                        case DELETE:
+                            // 清理注册服务缓存
+//                            registryServiceCache.clearCache();
+                            // 原教程代码，不支持多个服务同时缓存
+
+                            // 优化后的代码，支持多个服务同时缓存
+                            registryServiceMultiCache.clearCache(serviceKey);
+                            break;
+                        case PUT:
+                        default:
+                            break;
+                    }
+                }
+            });
+        }
+
     }
 }
 

@@ -11,10 +11,8 @@ import com.zzy.yurpc.model.RpcResponse;
 import com.zzy.yurpc.model.ServiceMetaInfo;
 import com.zzy.yurpc.registry.Registry;
 import com.zzy.yurpc.registry.RegistryFactory;
-import com.zzy.yurpc.serializer.JdkSerializer;
 import com.zzy.yurpc.serializer.Serializer;
 import com.zzy.yurpc.serializer.SerializerFactory;
-
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -23,10 +21,6 @@ import java.util.List;
 
 /**
  * 服务代理（JDK 动态代理）
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @learn <a href="https://codefather.cn">编程宝典</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 public class ServiceProxy implements InvocationHandler {
 

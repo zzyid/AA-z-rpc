@@ -113,9 +113,10 @@ public class EtcdRegistry implements Registry{
      */
     @Override
     public List<ServiceMetaInfo> serviceDiscover(String serviceKey) {
-//        // 优先从缓存获取服务
+        // 优先从缓存获取服务
 //        List<ServiceMetaInfo> cacheServiceMetaInfoList = registryServiceCache.readCache();
 
+        // 优先从缓存获取服务
         // 优化后的代码，支持多个服务同时缓存
         List<ServiceMetaInfo> cachedServiceMetaInfoList = registryServiceMultiCache.readCache(serviceKey);
         if(cachedServiceMetaInfoList != null){
@@ -124,8 +125,9 @@ public class EtcdRegistry implements Registry{
         String searchPrefix = ETCD_ROOT_PATH + serviceKey;
 
         try{
-            //前缀查询
+            // getOption：设置查询为前缀匹配
             GetOption getOption = GetOption.builder().isPrefix(true).build();
+
             List<KeyValue> keyValues = kvClient.get(
                     ByteSequence.from(searchPrefix, StandardCharsets.UTF_8),
                     getOption
@@ -136,6 +138,7 @@ public class EtcdRegistry implements Registry{
                         String key = keyValue.getKey().toString(StandardCharsets.UTF_8);
                         // 监听key的变化
                         watch(key);
+
                         String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
                         return JSONUtil.toBean(value, ServiceMetaInfo.class);
                     })

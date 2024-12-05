@@ -1,0 +1,4 @@
+failBack=com.zzy.yurpc.fault.tolerant.FailBackTolerantStrategy
+failFast=com.zzy.yurpc.fault.tolerant.FailFastTolerantStrategy
+failOver=com.zzy.yurpc.fault.tolerant.FailOverTolerantStrategy
+failSafe=com.zzy.yurpc.fault.tolerant.FailSafeTolerantStrategy

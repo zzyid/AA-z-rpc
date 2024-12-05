@@ -1,0 +1,2 @@
+no=com.zzy.yurpc.fault.retry.NoRetryStrategy
+fixedInterval=com.zzy.yurpc.fault.retry.FixedIntervalRetryStrategy

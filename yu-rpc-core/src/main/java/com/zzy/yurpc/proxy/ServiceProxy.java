@@ -6,6 +6,10 @@ import cn.hutool.http.HttpResponse;
 import com.zzy.yurpc.RpcApplication;
 import com.zzy.yurpc.config.RpcConfig;
 import com.zzy.yurpc.constanl.RpcConstant;
+import com.zzy.yurpc.fault.retry.RetryStrategy;
+import com.zzy.yurpc.fault.retry.RetryStrategyFactory;
+import com.zzy.yurpc.fault.tolerant.TolerantStrategy;
+import com.zzy.yurpc.fault.tolerant.TolerantStrategyFactory;
 import com.zzy.yurpc.loadbalancer.LoadBalancer;
 import com.zzy.yurpc.loadbalancer.LoadBalancerFactory;
 import com.zzy.yurpc.model.RpcRequest;
@@ -49,6 +53,7 @@ public class ServiceProxy implements InvocationHandler {
                 .build();
         try {
             // 从注册中心获取服务提供者请求地址
+
             RpcConfig rpcConfig = RpcApplication.getRpcConfig();
             // 2. 获取注册中心实例
             Registry registry = RegistryFactory.getInstance(rpcConfig.getRegistryConfig().getRegistry());
@@ -70,7 +75,18 @@ public class ServiceProxy implements InvocationHandler {
 
             // 发送请求
             // 发送 TCP 请求
-            RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo);
+
+            RpcResponse rpcResponse;
+            try {
+                RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
+                rpcResponse = retryStrategy.doRetry(() ->
+                        VertxTcpClient.doRequest(rpcRequest, selectedServiceMetaInfo)
+                );
+            } catch (Exception e){
+                // 容错机制
+                TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(rpcConfig.getTolerantStrategy());
+                rpcResponse = tolerantStrategy.doTolerant(null, e);
+            }
             return rpcResponse.getData();
         } catch (Exception e) {
             throw new RuntimeException("调用失败");

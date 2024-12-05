@@ -1,5 +1,7 @@
 package com.zzy.yurpc.config;
 
+import com.zzy.yurpc.fault.retry.RetryStrategyKeys;
+import com.zzy.yurpc.fault.tolerant.TolerantStrategyKeys;
 import com.zzy.yurpc.loadbalancer.LoadBalancerKeys;
 import com.zzy.yurpc.serializer.SerializerKeys;
 import lombok.Data;
@@ -47,4 +49,15 @@ public class RpcConfig {
      * 负载均衡器
      */
     private String loadBalancer = LoadBalancerKeys.RANDOM;
+
+    /**
+     * 重试策略
+     */
+    private String retryStrategy = RetryStrategyKeys.FIXED_INTERVAL;
+
+    /**
+     * 容错策略
+     */
+    private String tolerantStrategy = TolerantStrategyKeys.FAIL_FAST;
+
 }

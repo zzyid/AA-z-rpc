@@ -1,5 +1,6 @@
 package com.zzy.yurpc.config;
 
+import com.zzy.yurpc.loadbalancer.LoadBalancerKeys;
 import com.zzy.yurpc.serializer.SerializerKeys;
 import lombok.Data;
 
@@ -26,7 +27,7 @@ public class RpcConfig {
     /**
      * 服务器端口
      */
-    private int serverPort = 8081;
+    private int serverPort = 8084;
 
     /**
      * 是否使用模拟数据
@@ -41,4 +42,9 @@ public class RpcConfig {
      * 注册中心配置
      */
     private RegistryConfig registryConfig = new RegistryConfig();
+
+    /**
+     * 负载均衡器
+     */
+    private String loadBalancer = LoadBalancerKeys.RANDOM;
 }

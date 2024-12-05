@@ -1,36 +1,27 @@
 package com.zzy.yurpc.proxy;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.zzy.yurpc.RpcApplication;
 import com.zzy.yurpc.config.RpcConfig;
 import com.zzy.yurpc.constanl.RpcConstant;
+import com.zzy.yurpc.loadbalancer.LoadBalancer;
+import com.zzy.yurpc.loadbalancer.LoadBalancerFactory;
 import com.zzy.yurpc.model.RpcRequest;
 import com.zzy.yurpc.model.RpcResponse;
 import com.zzy.yurpc.model.ServiceMetaInfo;
-import com.zzy.yurpc.protocol.ProtocolConstant;
-import com.zzy.yurpc.protocol.ProtocolMessage;
-import com.zzy.yurpc.protocol.ProtocolMessageDecoder;
-import com.zzy.yurpc.protocol.ProtocolMessageEncoder;
-import com.zzy.yurpc.protocol.enums.ProtocolMessageSerializerEnum;
-import com.zzy.yurpc.protocol.enums.ProtocolMessageTypeEnum;
 import com.zzy.yurpc.registry.Registry;
 import com.zzy.yurpc.registry.RegistryFactory;
 import com.zzy.yurpc.serializer.Serializer;
 import com.zzy.yurpc.serializer.SerializerFactory;
 import com.zzy.yurpc.server.tcp.VertxTcpClient;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.net.NetClient;
-import io.vertx.core.net.NetSocket;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * 服务代理（JDK 动态代理）
@@ -69,8 +60,13 @@ public class ServiceProxy implements InvocationHandler {
             if(CollUtil.isEmpty(serviceMetaInfosList)){
                 throw new RuntimeException("暂无服务地址");
             }
-            //TODO 暂时先取第一个
-            ServiceMetaInfo selectedServiceMetaInfo  = serviceMetaInfosList.get(0);
+
+            //负载均衡
+            LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+            // 将调用方法名(请求路径)作为负载均衡参数
+            HashMap<String, Object> requestParams = new HashMap<>();
+            requestParams.put("methodName",rpcRequest.getMethodName());
+            ServiceMetaInfo selectedServiceMetaInfo  = loadBalancer.select(requestParams, serviceMetaInfosList);
 
             // 发送请求
             // 发送 TCP 请求
